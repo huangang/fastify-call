@@ -13,28 +13,39 @@ function fastifyCall (fastify, options, done) {
     const route = [request.raw.method.toLocaleLowerCase() + request.raw.originalUrl].join('')
     if (calls[route]) {
       event.emit(route, payload, next)
+    } else {
+      next()
     }
-    next()
   })
 
   fastify.decorate('call', (path, { method, request, reply }) => {
-    method = method.toLocaleLowerCase()
-    if (path.substr(0, 1) !== '/') {
-      path = ['/', path].join('')
-    }
-    const call = fastify.routes.get(path)
-    const route = [request.raw.method.toLocaleLowerCase() + request.raw.originalUrl].join('')
-    calls[route] = true
-    call[method].handler(request, reply)
     return new Promise((resolve, reject) => {
+      method = method.toLocaleLowerCase()
+      if (path.substr(0, 1) !== '/') {
+        path = ['/', path].join('')
+      }
+      const call = fastify.routes.get(path)
+      const route = [request.raw.method.toLocaleLowerCase() + request.raw.originalUrl].join('')
+      calls[route] = true
       event.on(route, (payload, next) => {
         if (typeof payload === 'string') {
           try {
             payload = JSON.parse(payload)
           } catch (e) {}
         }
-        next(resolve(payload))
+        resolve({
+          data: payload,
+          next: (data) => {
+            if (typeof data === 'object') {
+              try {
+                data = JSON.stringify(data)
+              } catch (e) {}
+            }
+            next(null, data)
+          }
+        })
       })
+      call[method].handler(request, reply)
     })
   })
   done()

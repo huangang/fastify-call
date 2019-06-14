@@ -12,8 +12,10 @@ test('call self', function (t) {
     reply.send({ 'hello': 't1' })
   })
   fastify.get('/t2', function (request, reply) {
-    return fastify.call('t1', { method: 'get', request, reply }).then((data) => {
+    return fastify.call('t1', { method: 'get', request, reply }).then(({ data, next }) => {
+      data.world = 't2'
       t.equal(data.hello, 't1')
+      next(data)
     })
   })
 
@@ -28,8 +30,12 @@ test('call self', function (t) {
       path: '/t2'
     }, (res) => {
       t.equal(res.statusCode, 200)
+      let data = ''
+      res.on('data', chunk => { data += chunk })
       res.resume()
       res.on('end', () => {
+        data = JSON.parse(data)
+        t.equal(data.world, 't2')
         t.pass('res ended successfully')
         t.end()
       })
