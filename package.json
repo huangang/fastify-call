@@ -1,0 +1,27 @@
+{
+  "name": "fastify-call",
+  "version": "0.0.1",
+  "description": "fastify call self method",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huangang/fastify-call.git"
+  },
+  "keywords": [
+    "fastify",
+    "callself"
+  ],
+  "author": "huangang <huangang.zhang@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fastify-plugin": "^1.6.0",
+    "fastify-routes": "^2.0.3"
+  },
+  "devDependencies": {
+    "fastify": "^2.5.0",
+    "tap": "^14.2.2"
+  }
+}
