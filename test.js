@@ -12,10 +12,10 @@ test('call self', function (t) {
     reply.send({ 'hello': 't1' })
   })
   fastify.get('/t2', function (request, reply) {
-    return fastify.call('t1', { method: 'get', request, reply }).then(({ data, next }) => {
+    return fastify.call('t1', { method: 'get', request, reply }).then((data) => {
       data.world = 't2'
       t.equal(data.hello, 't1')
-      next(data)
+      return reply.send(data)
     })
   })
 

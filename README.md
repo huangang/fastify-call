@@ -22,9 +22,9 @@ fastify.get('/t1', function (request, reply) {
 })
 
 fastify.get('/t2', function (request, reply) {
-  return fastify.call('t1', { method: 'get', request, reply }).then(({ data, next }) => {
+  return fastify.call('t1', { method: 'get', request, reply }).then((data) => {
     data.world = 't2'
-    next(data)
+    return reply.send(data)
   })
 })
 
