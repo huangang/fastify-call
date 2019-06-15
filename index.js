@@ -8,7 +8,7 @@ function fastifyCall (fastify, options, done) {
   const event = new EventEmitter()
   options = options || {}
 
-  fastify.decorate('call', (path, { method, request, reply }) => {
+  let callHandler = (path, method = 'get', request, reply) => {
     return new Promise((resolve, reject) => {
       if (path.substr(0, 1) !== '/') {
         path = ['/', path].join('')
@@ -21,7 +21,7 @@ function fastifyCall (fastify, options, done) {
         reply.send = (payload) => {
           return event.emit(route, payload)
         }
-        event.once(route, async (payload) => {
+        event.once(route, (payload) => {
           reply.send = originSend
           resolve(payload)
         })
@@ -31,7 +31,21 @@ function fastifyCall (fastify, options, done) {
         reject(new Error('call ' + method + ' ' + path + ' not found'))
       }
     })
+  }
+
+  let call = (path, { method = 'get', request, reply }) => {
+    return callHandler(path, method, request, reply)
+  }
+
+  const METHODS = ['get', 'post', 'delete', 'put', 'head', 'options', 'patch']
+  METHODS.forEach((method) => {
+    call[method] = (path, { request, reply }) => {
+      return callHandler(path, method, request, reply)
+    }
   })
+
+  fastify.decorate('call', call)
+
   done()
 }
 

@@ -12,8 +12,32 @@ test('call self', function (t) {
     reply.send({ 'hello': 't1' })
   })
   fastify.get('/t2', function (request, reply) {
-    return fastify.call('t1', { method: 'get', request, reply }).then((data) => {
+    return fastify.call.get('t1', { request, reply }).then((data) => {
       data.world = 't2'
+      t.equal(data.hello, 't1')
+      return reply.send(data)
+    })
+  })
+
+  fastify.get('/t3', function (request, reply) {
+    return fastify.call.post('t1', { request, reply }).then((data) => {
+      data.world = 't3'
+      t.equal(data.hello, 't1')
+      return reply.send(data)
+    })
+  })
+
+  fastify.get('/t4', function (request, reply) {
+    return fastify.call.delete('t1', { request, reply }).then((data) => {
+      data.world = 't4'
+      t.equal(data.hello, 't1')
+      return reply.send(data)
+    })
+  })
+
+  fastify.get('/t5', function (request, reply) {
+    return fastify.call.put('t1', { request, reply }).then((data) => {
+      data.world = 't5'
       t.equal(data.hello, 't1')
       return reply.send(data)
     })

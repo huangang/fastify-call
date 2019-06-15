@@ -28,6 +28,13 @@ fastify.get('/t2', function (request, reply) {
   })
 })
 
+fastify.get('/t3', function (request, reply) {
+  return fastify.call.post('t1', { request, reply }).then((data) => {
+    data.world = 't3'
+    return reply.send(data)
+  })
+})
+
 fastify.listen(3000, err => {
   if (err) throw err
   console.log(`server listening on ${fastify.server.address().port}`)
