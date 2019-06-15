@@ -22,14 +22,14 @@ fastify.get('/t1', function (request, reply) {
 })
 
 fastify.get('/t2', function (request, reply) {
-  return fastify.call('t1', { method: 'get', request, reply }).then((data) => {
+  return fastify.call('t1').then((data) => {
     data.world = 't2'
     return reply.send(data)
   })
 })
 
 fastify.get('/t3', function (request, reply) {
-  return fastify.call.post('t1', { request, reply }).then((data) => {
+  return fastify.call.post('t1', { a: 1 }).then((data) => {
     data.world = 't3'
     return reply.send(data)
   })

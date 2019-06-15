@@ -5,10 +5,23 @@ const EventEmitter = require('events').EventEmitter
 
 function fastifyCall (fastify, options, done) {
   fastify.register(require('fastify-routes'))
+  let _request
+  let _reply
+  fastify.addHook('preHandler', (request, reply, done) => {
+    _reply = reply
+    _request = request
+    done()
+  })
+
   const event = new EventEmitter()
   options = options || {}
 
-  let callHandler = (path, method = 'get', request, reply) => {
+  let callHandler = (path, params, method = 'get') => {
+    if (method === 'post' || method === 'put') {
+      _request.body = params
+    } else {
+      _request.query = params
+    }
     return new Promise((resolve, reject) => {
       if (path.substr(0, 1) !== '/') {
         path = ['/', path].join('')
@@ -16,16 +29,16 @@ function fastifyCall (fastify, options, done) {
       const call = fastify.routes.get(path)
       method = method.toLocaleLowerCase()
       if (call && call[method]) {
-        const route = [request.raw.method.toLocaleLowerCase(), request.raw.originalUrl].join('')
-        const originSend = reply.send
-        reply.send = (payload) => {
+        const route = [_request.raw.method.toLocaleLowerCase(), _request.raw.originalUrl].join('')
+        const originSend = _reply.send
+        _reply.send = (payload) => {
           return event.emit(route, payload)
         }
         event.once(route, (payload) => {
-          reply.send = originSend
+          _reply.send = originSend
           resolve(payload)
         })
-        call[method].handler(request, reply)
+        call[method].handler(_request, _reply)
       } else {
         // console.error(method, path + ' call not found')
         reject(new Error('call ' + method + ' ' + path + ' not found'))
@@ -33,14 +46,14 @@ function fastifyCall (fastify, options, done) {
     })
   }
 
-  let call = (path, { method = 'get', request, reply }) => {
-    return callHandler(path, method, request, reply)
+  let call = (path, params, method = 'get') => {
+    return callHandler(path, params, method)
   }
 
   const METHODS = ['get', 'post', 'delete', 'put', 'head', 'options', 'patch']
   METHODS.forEach((method) => {
-    call[method] = (path, { request, reply }) => {
-      return callHandler(path, method, request, reply)
+    call[method] = (path, params) => {
+      return callHandler(path, params, method)
     }
   })
 
@@ -50,6 +63,6 @@ function fastifyCall (fastify, options, done) {
 }
 
 module.exports = fp(fastifyCall, {
-  fastify: '>= 1.0.0',
+  fastify: '>= 1.1.0',
   name: 'fastify-call'
 })

@@ -1,6 +1,6 @@
 {
   "name": "fastify-call",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "fastify call self method",
   "main": "index.js",
   "scripts": {
