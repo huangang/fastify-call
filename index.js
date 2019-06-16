@@ -34,11 +34,20 @@ function fastifyCall (fastify, options, done) {
         _reply.send = (payload) => {
           return event.emit(route, payload)
         }
-        event.once(route, (payload) => {
+        let listener = (payload) => {
           _reply.send = originSend
           resolve(payload)
-        })
-        call[method].handler(_request, _reply)
+        }
+        event.once(route, listener)
+        let callPromise = call[method].handler(_request, _reply)
+        if (callPromise && typeof callPromise.then === 'function') {
+          callPromise.then((payload) => {
+            if (payload) {
+              event.off(route, listener)
+              listener(payload)
+            }
+          })
+        }
       } else {
         // console.error(method, path + ' call not found')
         reject(new Error('call ' + method + ' ' + path + ' not found'))

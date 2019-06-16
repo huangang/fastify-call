@@ -7,16 +7,16 @@ fastify.get('/t1', function (request, reply) {
   reply.send({ 'hello': 'get t1' })
 })
 
-fastify.post('/t1', function (request, reply) {
+fastify.post('/t1', async (request, reply) => {
+  return Object.assign({ 'hello': 'post t1' }, request.body)
+})
+
+fastify.put('/t1', async (request, reply) => {
   reply.send(Object.assign({ 'hello': 'put t1' }, request.body))
 })
 
-fastify.put('/t1', function (request, reply) {
-  reply.send(Object.assign({ 'hello': 'put t1' }, request.body))
-})
-
-fastify.delete('/t1', function (request, reply) {
-  reply.send({ 'hello': 'delete t1' })
+fastify.delete('/t1', async (request, reply) => {
+  return reply.send({ 'hello': 'delete t1' })
 })
 
 fastify.get('/t2', function (request, reply) {
@@ -34,14 +34,14 @@ fastify.get('/t3', function (request, reply) {
 })
 
 fastify.get('/t4', function (request, reply) {
-  return fastify.call.delete('t1').then((data) => {
+  return fastify.call.put('t1').then((data) => {
     data.world = 't4'
     return reply.send(data)
   })
 })
 
 fastify.get('/t5', function (request, reply) {
-  return fastify.call.put('t1').then((data) => {
+  return fastify.call.delete('t1').then((data) => {
     data.world = 't5'
     return reply.send(data)
   })
