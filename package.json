@@ -4,7 +4,8 @@
   "description": "fastify call self method",
   "main": "index.js",
   "scripts": {
-    "test": "tap test.js"
+    "test": "tap test.js",
+    "example": "node example.js"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "fastify": "^2.5.0",
+    "simple-get": "^3.0.3",
     "tap": "^14.2.2"
   }
 }

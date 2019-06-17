@@ -27,10 +27,6 @@ fastify.get('/t2', function (request, reply) {
   })
 })
 
-fastify.get('/t22', function (request, reply) {
-  return fastify.call.get('t2')
-})
-
 fastify.get('/t3', function (request, reply) {
   return fastify.call.post('t1', { a: 1, b: 2 }).then((data) => {
     data.world = 't3'
@@ -58,6 +54,20 @@ fastify.get('/t5', function (request, reply) {
 
 fastify.get('/t6', function (request, reply) {
   return fastify.call.post('t1', { a: 3 })
+})
+
+fastify.get('/t7', function (request, reply) {
+  return fastify.call.get('t2')
+})
+
+fastify.get('/t8', async (request, reply) => {
+  return fastify.call.get('t2')
+})
+
+fastify.get('/t9', async (request, reply) => {
+  let res = await fastify.call.get('t8')
+  res.world = 't9'
+  return res
 })
 
 fastify.listen(3000, err => {
