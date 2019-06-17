@@ -21,9 +21,14 @@ fastify.delete('/t1', async (request, reply) => {
 
 fastify.get('/t2', function (request, reply) {
   return fastify.call.get('t1').then((data) => {
+    console.log('call t2')
     data.world = 't2'
     return reply.send(data)
   })
+})
+
+fastify.get('/t22', function (request, reply) {
+  return fastify.call.get('t2')
 })
 
 fastify.get('/t3', function (request, reply) {

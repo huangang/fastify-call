@@ -32,20 +32,19 @@ function fastifyCall (fastify, options, done) {
         const route = [_request.raw.method.toLocaleLowerCase(), _request.raw.originalUrl].join('')
         const originSend = _reply.send
         _reply.send = (payload) => {
-          return event.emit(route, payload)
+          _reply.send = originSend
+          event.emit(route, payload)
         }
         let listener = (payload) => {
-          _reply.send = originSend
           resolve(payload)
         }
         event.once(route, listener)
         let callPromise = call[method].handler(_request, _reply)
         if (callPromise && typeof callPromise.then === 'function') {
           callPromise.then((payload) => {
-            if (payload) {
-              event.off(route, listener)
-              listener(payload)
-            }
+            _reply.send = originSend
+            event.off(route, listener)
+            listener(payload)
           })
         }
       } else {
