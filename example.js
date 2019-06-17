@@ -47,6 +47,10 @@ fastify.get('/t5', function (request, reply) {
   })
 })
 
+fastify.get('/t6', function (request, reply) {
+  return fastify.call.post('t1', { a: 3 })
+})
+
 fastify.listen(3000, err => {
   if (err) throw err
   console.log(`server listening on ${fastify.server.address().port}`)
