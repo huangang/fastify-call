@@ -12,7 +12,7 @@ fastify.post('/t1', async (request, reply) => {
 })
 
 fastify.put('/t1', async (request, reply) => {
-  reply.send(Object.assign({ 'hello': 'put t1' }, request.body))
+  reply.code(500).send(Object.assign({ 'hello': 'put t1' }, request.body))
 })
 
 fastify.delete('/t1', async (request, reply) => {
@@ -42,6 +42,10 @@ fastify.get('/t4', function (request, reply) {
   return fastify.call.put('t1').then((data) => {
     data.world = 't4'
     return reply.send(data)
+  }).catch((err) => {
+    console.error('t4 error', err)
+    err.error = 'error'
+    return reply.send(err)
   })
 })
 

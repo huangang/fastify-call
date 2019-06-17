@@ -31,9 +31,21 @@ function fastifyCall (fastify, options, done) {
       if (call && call[method]) {
         const route = [_request.raw.method.toLocaleLowerCase(), _request.raw.originalUrl].join('')
         const originSend = _reply.send
-        _reply.send = (payload) => {
+        const originCode = _reply.code
+        const resetReply = () => {
           _reply.send = originSend
+          _reply.code = originCode
+        }
+        _reply.send = (payload) => {
+          resetReply()
           event.emit(route, payload)
+        }
+        _reply.code = (code) => {
+          _reply.code = originCode
+          if (code && parseInt(code) !== 200) {
+            resolve = reject
+          }
+          return _reply.code(code)
         }
         let listener = (payload) => {
           resolve(payload)
@@ -42,11 +54,11 @@ function fastifyCall (fastify, options, done) {
         let callPromise = call[method].handler(_request, _reply)
         if (callPromise && typeof callPromise.then === 'function') {
           callPromise.then((payload) => {
-            _reply.send = originSend
+            resetReply()
             event.off(route, listener)
             resolve(payload)
           }).catch((err) => {
-            _reply.send = originSend
+            resetReply()
             reject(err)
           })
         }
