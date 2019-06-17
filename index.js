@@ -44,7 +44,10 @@ function fastifyCall (fastify, options, done) {
           callPromise.then((payload) => {
             _reply.send = originSend
             event.off(route, listener)
-            listener(payload)
+            resolve(payload)
+          }).catch((err) => {
+            _reply.send = originSend
+            reject(err)
           })
         }
       } else {
