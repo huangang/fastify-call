@@ -4,7 +4,6 @@ const simple = require('simple-get')
 
 test('call self', function (t) {
   const fastify = require('fastify')()
-  t.tearDown(fastify.close.bind(fastify))
 
   fastify.register(require('.'))
 
@@ -26,7 +25,7 @@ test('call self', function (t) {
 
   fastify.get('/t2', function (request, reply) {
     return fastify.call.get('t1').then((data) => {
-      console.log('call t2')
+      t.pass('call t2')
       data.world = 't2'
       return reply.send(data)
     })
@@ -44,7 +43,7 @@ test('call self', function (t) {
       data.world = 't4'
       return reply.send(data)
     }).catch((err) => {
-      console.error('t4 error', err)
+      // console.error('t4 error', err)
       err.error = 'error'
       return reply.send(err)
     })
@@ -75,15 +74,13 @@ test('call self', function (t) {
     return res
   })
 
-  t.tearDown(fastify.close.bind(fastify))
-
-  fastify.listen(0, err => {
+  fastify.listen(0, async err => {
     t.error(err)
     const port = fastify.server.address().port
-    console.log(`server listening on ${port}`)
+    t.pass(`server listening on ${port}`)
 
-    t.test('t2', t => {
-      t.plan(2)
+    await t.test('t2', t => {
+      t.plan(3)
       simple.concat({
         method: 'GET',
         url: 'http://localhost:' + port + '/t2',
@@ -95,25 +92,25 @@ test('call self', function (t) {
       })
     })
 
-    t.test('t3', t => {
-      t.plan(3)
+    console.log('t2')
+    await t.test('t3', t => {
+      t.plan(7)
       simple.concat({
         method: 'GET',
         url: 'http://localhost:' + port + '/t3',
         json: true
       }, (err, response, body) => {
         t.error(err)
-        console.log(body)
         t.strictEqual(response.statusCode, 200)
         t.equal(body.hello, 'post t1')
         t.equal(body.world, 't3')
         t.equal(body.a, 1)
         t.equal(body.b, 2)
-        console.log('pass t3')
+        t.pass('pass t3')
       })
     })
-
-    t.test('t4', t => {
+    console.log('t3')
+    await t.test('t4', t => {
       t.plan(4)
       simple.concat({
         method: 'GET',
@@ -123,13 +120,12 @@ test('call self', function (t) {
         t.error(err)
         t.strictEqual(response.statusCode, 500)
         t.equal(body.error, 'error')
-        t.end()
-        console.log('pass t4')
+        t.pass('pass t4')
       })
     })
-
-    t.test('t5', t => {
-      t.plan(5)
+    console.log('t4')
+    await t.test('t5', t => {
+      t.plan(4)
       simple.concat({
         method: 'GET',
         url: 'http://localhost:' + port + '/t5',
@@ -138,13 +134,12 @@ test('call self', function (t) {
         t.error(err)
         t.strictEqual(response.statusCode, 200)
         t.equal(body.world, 't5')
-        t.end()
-        console.log('pass t5')
+        t.pass('pass t5')
       })
     })
-
-    t.test('t6', t => {
-      t.plan(6)
+    console.log('t5')
+    await t.test('t6', t => {
+      t.plan(4)
       simple.concat({
         method: 'GET',
         url: 'http://localhost:' + port + '/t6',
@@ -153,13 +148,12 @@ test('call self', function (t) {
         t.error(err)
         t.strictEqual(response.statusCode, 200)
         t.equal(body.hello, 'post t1')
-        t.end()
-        console.log('pass t6')
+        t.pass('pass t6')
       })
     })
-
-    t.test('t7', t => {
-      t.plan(7)
+    console.log('t6')
+    await t.test('t7', t => {
+      t.plan(4)
       simple.concat({
         method: 'GET',
         url: 'http://localhost:' + port + '/t7',
@@ -168,13 +162,12 @@ test('call self', function (t) {
         t.error(err)
         t.strictEqual(response.statusCode, 200)
         t.equal(body.world, 't2')
-        t.end()
-        console.log('pass t7')
+        t.pass('pass t7')
       })
     })
-
-    t.test('t8', t => {
-      t.plan(8)
+    console.log('t7')
+    await t.test('t8', t => {
+      t.plan(4)
       simple.concat({
         method: 'GET',
         url: 'http://localhost:' + port + '/t8',
@@ -183,26 +176,27 @@ test('call self', function (t) {
         t.error(err)
         t.strictEqual(response.statusCode, 200)
         t.equal(body.world, 't2')
-        t.end()
-        console.log('pass t8')
+        t.pass('pass t8')
       })
     })
-
-    t.test('t9', t => {
-      t.plan(9)
+    console.log('t8')
+    await t.test('t9', t => {
+      t.plan(4)
       simple.concat({
         method: 'GET',
-        url: 'http://localhost:' + port + '/t8',
+        url: 'http://localhost:' + port + '/t9',
         json: true
       }, (err, response, body) => {
-        console.log('t9')
         t.error(err)
         t.strictEqual(response.statusCode, 200)
         t.equal(body.world, 't9')
-        console.log('pass t9')
-        t.end()
-        t.tearDown(fastify.close.bind(fastify))
+        t.pass('pass t9')
       })
+    })
+    console.log('t9')
+
+    fastify.close().then(() => {
+      t.endAll()
     })
   })
 })
