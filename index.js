@@ -54,9 +54,11 @@ function fastifyCall (fastify, options, done) {
         let callPromise = call[method].handler(_request, _reply)
         if (callPromise && typeof callPromise.then === 'function') {
           callPromise.then((payload) => {
-            resetReply()
-            event.off(route, listener)
-            resolve(payload)
+            if (typeof payload !== 'undefined') {
+              resetReply()
+              event.off(route, listener)
+              resolve(payload)
+            }
           }).catch((err) => {
             resetReply()
             reject(err)
