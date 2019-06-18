@@ -29,7 +29,7 @@ function fastifyCall (fastify, options, done) {
       const call = fastify.routes.get(path)
       method = method.toLocaleLowerCase()
       if (call && call[method]) {
-        const route = [_request.raw.method.toLocaleLowerCase(), _request.raw.originalUrl].join('')
+        const route = [method, path].join('')
         const originSend = _reply.send
         const originCode = _reply.code
         const resetReply = () => {
@@ -54,9 +54,9 @@ function fastifyCall (fastify, options, done) {
         let callPromise = call[method].handler(_request, _reply)
         if (callPromise && typeof callPromise.then === 'function') {
           callPromise.then((payload) => {
+            resetReply()
+            event.off(route, listener)
             if (typeof payload !== 'undefined') {
-              resetReply()
-              event.off(route, listener)
               resolve(payload)
             }
           }).catch((err) => {
