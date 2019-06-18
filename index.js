@@ -17,6 +17,7 @@ function fastifyCall (fastify, options, done) {
   options = options || {}
 
   let callHandler = (path, params, method = 'get') => {
+    method = method.toLowerCase()
     if (method === 'post' || method === 'put') {
       _request.body = params
     } else {
@@ -27,7 +28,6 @@ function fastifyCall (fastify, options, done) {
         path = ['/', path].join('')
       }
       const call = fastify.routes.get(path)
-      method = method.toLocaleLowerCase()
       if (call && call[method]) {
         const route = [method, path].join('')
         const originSend = _reply.send
