@@ -101,6 +101,7 @@ test('call self', function (t) {
         json: true
       }, (err, response, body) => {
         t.error(err)
+        // console.log(response.statusCode)
         t.strictEqual(response.statusCode, 200)
         t.equal(body.hello, 'post t1')
         t.equal(body.world, 't3')

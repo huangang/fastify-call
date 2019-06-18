@@ -1,7 +1,7 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const EventEmitter = require('events').EventEmitter
+const Emitter = require('component-emitter')
 
 function fastifyCall (fastify, options, done) {
   fastify.register(require('fastify-routes'))
@@ -13,7 +13,7 @@ function fastifyCall (fastify, options, done) {
     done()
   })
 
-  const event = new EventEmitter()
+  const event = new Emitter()
   options = options || {}
 
   let callHandler = (path, params, method = 'get') => {
