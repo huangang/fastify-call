@@ -70,6 +70,30 @@ fastify.get('/t9', async (request, reply) => {
   return res
 })
 
+fastify.get('/t10', async (request, reply) => {
+  return fastify.call('t8')
+})
+
+fastify.post('/t11', async (request, reply) => {
+  throw new Error('t11 error')
+})
+
+fastify.get('/t12', async (request, reply) => {
+  return fastify.call('/t11', 'post', { a: 1, b: 2 })
+})
+
+fastify.get('/t13', async (request, reply) => {
+  return reply.code(500).send({ hello: 't13' })
+})
+
+fastify.get('/t14', async (request, reply) => {
+  return fastify.call('/t13', 'post')
+})
+
+fastify.get('/t100', async (request, reply) => {
+  return fastify.call('t1000')
+})
+
 fastify.listen(3000, err => {
   if (err) throw err
   console.log(`server listening on ${fastify.server.address().port}`)

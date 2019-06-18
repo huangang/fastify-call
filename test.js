@@ -74,6 +74,30 @@ test('call self', function (t) {
     return res
   })
 
+  fastify.get('/t10', async (request, reply) => {
+    return fastify.call('t8')
+  })
+
+  fastify.post('/t11', async (request, reply) => {
+    throw new Error('t11 error')
+  })
+
+  fastify.get('/t12', async (request, reply) => {
+    return fastify.call('/t11', 'post', { a: 1, b: 2 })
+  })
+
+  fastify.get('/t13', async (request, reply) => {
+    return reply.code(500).send({ hello: 't13' })
+  })
+
+  fastify.get('/t14', async (request, reply) => {
+    return fastify.call('/t13', 'get')
+  })
+
+  fastify.get('/t100', async (request, reply) => {
+    return fastify.call('t1000')
+  })
+
   fastify.listen(0, async err => {
     t.error(err)
     const port = fastify.server.address().port
@@ -195,6 +219,67 @@ test('call self', function (t) {
       })
     })
     console.log('t9')
+
+    await t.test('t10', t => {
+      t.plan(4)
+      simple.concat({
+        method: 'GET',
+        url: 'http://localhost:' + port + '/t10',
+        json: true
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 200)
+        t.equal(body.world, 't2')
+        t.pass('pass t10')
+      })
+    })
+    console.log('t10')
+
+    await t.test('t12', t => {
+      t.plan(4)
+      simple.concat({
+        method: 'GET',
+        url: 'http://localhost:' + port + '/t12',
+        json: true
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 500)
+        t.equal(body.message, 't11 error')
+        t.pass('pass t12')
+      })
+    })
+    console.log('t12')
+
+    await t.test('t14', t => {
+      t.plan(4)
+      simple.concat({
+        method: 'GET',
+        url: 'http://localhost:' + port + '/t14',
+        json: true
+      }, (err, response, body) => {
+        console.log(body)
+        t.error(err)
+        t.strictEqual(response.statusCode, 500)
+        t.equal(body.hello, 't13')
+        t.pass('pass t14')
+      })
+    })
+    console.log('t14')
+
+    await t.test('t100', t => {
+      t.plan(4)
+      simple.concat({
+        method: 'GET',
+        url: 'http://localhost:' + port + '/t100',
+        json: true
+      }, (err, response, body) => {
+        t.error(err)
+        t.strictEqual(response.statusCode, 500)
+        t.equal(body.message, 'call get /t1000 not found')
+        t.pass('pass t100')
+      })
+    })
+    console.log('t100')
 
     fastify.close().then(() => {
       t.endAll()

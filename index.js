@@ -14,9 +14,17 @@ function fastifyCall (fastify, options, done) {
   })
 
   const event = new Emitter()
-  options = options || {}
+  // options = options || {}
 
   let callHandler = (path, params, method = 'get') => {
+    if (typeof params === 'string') {
+      let _method
+      if (typeof method === 'object') {
+        _method = Object.assign({}, method)
+      }
+      method = params
+      params = _method || {}
+    }
     method = method.toLowerCase()
     if (method === 'post' || method === 'put') {
       _request.body = params
@@ -42,7 +50,7 @@ function fastifyCall (fastify, options, done) {
         }
         _reply.code = (code) => {
           _reply.code = originCode
-          if (code && parseInt(code) !== 200) {
+          if (parseInt(code) !== 200) {
             resolve = reject
           }
           return _reply.code(code)
@@ -77,7 +85,7 @@ function fastifyCall (fastify, options, done) {
 
   const METHODS = ['get', 'post', 'delete', 'put', 'head', 'options', 'patch']
   METHODS.forEach((method) => {
-    call[method] = (path, params) => {
+    call[method] = (path, params = {}) => {
       return callHandler(path, params, method)
     }
   })
