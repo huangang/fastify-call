@@ -16,7 +16,7 @@ function fastifyCall (fastify, options, done) {
   const event = new Emitter()
   // options = options || {}
 
-  let callHandler = (path, params, method = 'get') => {
+  let call = (path, params, method = 'get') => {
     if (typeof params === 'string') {
       let _method
       if (typeof method === 'object') {
@@ -50,9 +50,7 @@ function fastifyCall (fastify, options, done) {
         }
         _reply.code = (code) => {
           _reply.code = originCode
-          if (parseInt(code) !== 200) {
-            resolve = reject
-          }
+          code >= 400 && (resolve = reject) // code gte 400 should reject result
           return _reply.code(code)
         }
         let listener = (payload) => {
@@ -79,14 +77,10 @@ function fastifyCall (fastify, options, done) {
     })
   }
 
-  let call = (path, params, method = 'get') => {
-    return callHandler(path, params, method)
-  }
-
   const METHODS = ['get', 'post', 'delete', 'put', 'head', 'options', 'patch']
   METHODS.forEach((method) => {
     call[method] = (path, params = {}) => {
-      return callHandler(path, params, method)
+      return call(path, params, method)
     }
   })
 
