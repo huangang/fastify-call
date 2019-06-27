@@ -3,8 +3,29 @@
 const fp = require('fastify-plugin')
 const Emitter = require('component-emitter')
 
+function isPromise (func) {
+  return func && typeof func.then === 'function'
+}
+
 function fastifyCall (fastify, options, done) {
-  fastify.register(require('fastify-routes'))
+  let routes = new Map()
+  fastify.addHook('onRoute', (routeOptions) => {
+    const { method, schema, url, logLevel, prefix, bodyLimit, handler, preHandler } = routeOptions
+    const _method = Array.isArray(method) ? method : [method]
+
+    _method.forEach(method => {
+      const key = method.toLowerCase()
+      const route = { method, schema, url, logLevel, prefix, bodyLimit, handler, preHandler }
+
+      if (routes.has(url)) {
+        let current = routes.get(url)
+        routes.set(url, Object.assign(current, { [key]: route }))
+      } else {
+        routes.set(url, { [key]: route })
+      }
+    })
+  })
+
   let _request
   let _reply
   fastify.addHook('preHandler', (request, reply, done) => {
@@ -31,11 +52,11 @@ function fastifyCall (fastify, options, done) {
     } else {
       _request.query = params
     }
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (path.substr(0, 1) !== '/') {
         path = ['/', path].join('')
       }
-      const call = fastify.routes.get(path)
+      const call = routes.get(path)
       if (call && call[method]) {
         const route = [method, path].join('')
         const originSend = _reply.send
@@ -57,18 +78,38 @@ function fastifyCall (fastify, options, done) {
           resolve(payload)
         }
         event.once(route, listener)
-        let callPromise = call[method].handler(_request, _reply)
-        if (callPromise && typeof callPromise.then === 'function') {
-          callPromise.then((payload) => {
-            resetReply()
-            event.off(route, listener)
-            if (typeof payload !== 'undefined') {
-              resolve(payload)
-            }
-          }).catch((err) => {
-            resetReply()
-            reject(err)
-          })
+        let done = () => {
+          let callHandler = call[method].handler(_request, _reply)
+          if (isPromise(callHandler)) {
+            callHandler.then((payload) => {
+              resetReply()
+              event.off(route, listener)
+              if (typeof payload !== 'undefined') {
+                resolve(payload)
+              }
+            }).catch((err) => {
+              resetReply()
+              reject(err)
+            })
+          }
+        }
+        if (call[method].preHandler) {
+          let preHandler = call[method].preHandler(_request, _reply, () => {})
+          // if (Object.prototype.toString.call(preHandler) === '[object AsyncFunction]') {
+          //   await preHandler(_request, _reply, () => {})
+          //   done()
+          // } else {
+          //   preHandler(_request, _reply, done)
+          // }
+          if (isPromise(preHandler)) {
+            preHandler.then(() => {
+              done()
+            })
+          } else {
+            done()
+          }
+        } else {
+          done()
         }
       } else {
         // console.error(method, path + ' call not found')

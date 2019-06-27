@@ -3,12 +3,31 @@
 const fastify = require('fastify')()
 fastify.register(require('.'))
 
-fastify.get('/t1', function (request, reply) {
-  reply.send({ 'hello': 'get t1' })
+fastify.get('/t1', {
+  preHandler: (request, reply, done) => {
+    console.log('preHandler get t1')
+    done()
+  },
+  handler: (request, reply) => {
+    reply.send({ 'hello': 'get t1' })
+  }
 })
 
-fastify.post('/t1', async (request, reply) => {
-  return Object.assign({ 'hello': 'post t1' }, request.body)
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time))
+}
+
+fastify.post('/t1', {
+  preHandler: async (request, reply, done) => {
+    console.log('222')
+    await sleep(1000)
+    console.log('preHandler post t1')
+    done && done()
+    return 1
+  },
+  handler: async (request, reply) => {
+    return Object.assign({ 'hello': 'post t1' }, request.body)
+  }
 })
 
 fastify.put('/t1', async (request, reply) => {
