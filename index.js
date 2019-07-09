@@ -61,9 +61,14 @@ function fastifyCall (fastify, options, done) {
         const route = [method, path].join('')
         const originSend = _reply.send
         const originCode = _reply.code
+        let reset = false
         const resetReply = () => {
+          if (reset) {
+            return
+          }
           _reply.send = originSend
           _reply.code = originCode
+          reset = true
         }
         _reply.send = (payload) => {
           resetReply()
