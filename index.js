@@ -1,7 +1,6 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const Emitter = require('component-emitter')
 
 function isPromise (func) {
   return func && typeof func.then === 'function'
@@ -34,7 +33,6 @@ function fastifyCall (fastify, options, done) {
     done()
   })
 
-  const event = new Emitter()
   // options = options || {}
 
   let call = (path, params, method = 'get') => {
@@ -58,7 +56,6 @@ function fastifyCall (fastify, options, done) {
       }
       const call = routes.get(path)
       if (call && call[method]) {
-        const route = [method, path].join('')
         const originSend = _reply.send
         const originCode = _reply.code
         let reset = false
@@ -72,23 +69,18 @@ function fastifyCall (fastify, options, done) {
         }
         _reply.send = (payload) => {
           resetReply()
-          event.emit(route, payload)
+          resolve(payload)
         }
         _reply.code = (code) => {
           _reply.code = originCode
           code >= 400 && (resolve = reject) // code gte 400 should reject result
           return _reply.code(code)
         }
-        let listener = (payload) => {
-          resolve(payload)
-        }
-        event.once(route, listener)
         let done = () => {
           let callHandler = call[method].handler(_request, _reply)
           if (isPromise(callHandler)) {
             callHandler.then((payload) => {
               resetReply()
-              event.off(route, listener)
               if (typeof payload !== 'undefined') {
                 resolve(payload)
               }
