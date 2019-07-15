@@ -43,4 +43,4 @@ fastify.listen(3000, err => {
 
 ## Notice
 if your service use too many `fastify-call`, suggestion use `async await` and with `try ··· catch ···`      
-like [this]('./example.js#L112')
+like [this](./example.js#L112)
