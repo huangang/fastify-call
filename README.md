@@ -40,3 +40,7 @@ fastify.listen(3000, err => {
   console.log(`server listening on ${fastify.server.address().port}`)
 })
 ```
+
+## Notice
+if your service use too many `fastify-call`, suggestion use `async await` and with `try ··· catch ···`      
+like [this]('./example.js#L112')
