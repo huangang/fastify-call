@@ -5,7 +5,7 @@ fastify.register(require('.'))
 
 fastify.get('/t1', {
   preHandler: (request, reply, done) => {
-    console.log('preHandler get t1')
+    // console.log('preHandler get t1')
     done()
   },
   handler: (request, reply) => {
@@ -19,9 +19,9 @@ function sleep (time) {
 
 fastify.post('/t1', {
   preHandler: async (request, reply, done) => {
-    console.log('222')
+    // console.log('222')
     await sleep(1000)
-    console.log('preHandler post t1')
+    // console.log('preHandler post t1')
     done && done()
     return 1
   },
@@ -40,7 +40,7 @@ fastify.delete('/t1', async (request, reply) => {
 
 fastify.get('/t2', function (request, reply) {
   return fastify.call.get('t1').then((data) => {
-    console.log('call t2')
+    // console.log('call t2')
     data.world = 't2'
     return reply.send(data)
   })
@@ -58,7 +58,7 @@ fastify.get('/t4', function (request, reply) {
     data.world = 't4'
     return reply.send(data)
   }).catch((err) => {
-    console.error('t4 error', err)
+    // console.error('t4 error', err)
     err.error = 'error'
     return reply.send(err)
   })
@@ -110,27 +110,11 @@ fastify.get('/t14', async (request, reply) => {
 })
 
 fastify.get('/t15', async (request, reply) => {
-  fastify.call.get('t2').then((data) => {
-    console.log('t2', data)
-  }).catch((err) => {
-    console.error('t2 error', err)
-  })
-  fastify.call.get('t3').then((data) => {
-    console.log('t3', data)
-  }).catch((err) => {
-    console.error('t3 error', err)
-  })
-  fastify.call.get('t4').then((data) => {
-    console.log('t4', data)
-  }).catch((err) => {
-    console.error('t4 error', err)
-  })
-  fastify.call.get('t5').then((data) => {
-    console.log('t5', data)
-  }).catch((err) => {
-    console.error('t5 error', err)
-  })
-  return fastify.call.get('/t13')
+  try { await fastify.call.get('t2') } catch (err) {}
+  try { await fastify.call.get('t3') } catch (err) {}
+  try { await fastify.call.get('t4') } catch (err) {}
+  try { await fastify.call.get('t5') } catch (err) {}
+  return fastify.call.get('t6')
 })
 
 fastify.get('/t100', async (request, reply) => {

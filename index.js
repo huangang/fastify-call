@@ -68,6 +68,7 @@ function fastifyCall (fastify, options, done) {
           reset = true
         }
         _reply.send = (payload) => {
+          // console.log('path %s method %s payload %j', path, method, payload)
           resetReply()
           resolve(payload)
         }
