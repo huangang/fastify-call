@@ -109,6 +109,30 @@ fastify.get('/t14', async (request, reply) => {
   return fastify.call('/t13', 'post')
 })
 
+fastify.get('/t15', async (request, reply) => {
+  fastify.call.get('t2').then((data) => {
+    console.log('t2', data)
+  }).catch((err) => {
+    console.error('t2 error', err)
+  })
+  fastify.call.get('t3').then((data) => {
+    console.log('t3', data)
+  }).catch((err) => {
+    console.error('t3 error', err)
+  })
+  fastify.call.get('t4').then((data) => {
+    console.log('t4', data)
+  }).catch((err) => {
+    console.error('t4 error', err)
+  })
+  fastify.call.get('t5').then((data) => {
+    console.log('t5', data)
+  }).catch((err) => {
+    console.error('t5 error', err)
+  })
+  return fastify.call.get('/t13')
+})
+
 fastify.get('/t100', async (request, reply) => {
   return fastify.call('t1000')
 })
