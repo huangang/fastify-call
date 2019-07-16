@@ -7,7 +7,7 @@ function isPromise (func) {
 }
 
 function fastifyCall (fastify, options, done) {
-  let routes = new Map()
+  const routes = new Map()
   fastify.addHook('onRoute', (routeOptions) => {
     const { method, schema, url, logLevel, prefix, bodyLimit, handler, preHandler } = routeOptions
     const _method = Array.isArray(method) ? method : [method]
@@ -17,7 +17,7 @@ function fastifyCall (fastify, options, done) {
       const route = { method, schema, url, logLevel, prefix, bodyLimit, handler, preHandler }
 
       if (routes.has(url)) {
-        let current = routes.get(url)
+        const current = routes.get(url)
         routes.set(url, Object.assign(current, { [key]: route }))
       } else {
         routes.set(url, { [key]: route })
@@ -35,7 +35,7 @@ function fastifyCall (fastify, options, done) {
 
   // options = options || {}
 
-  let call = (path, params, method = 'get') => {
+  const call = (path, params, method = 'get') => {
     if (typeof params === 'string') {
       let _method
       if (typeof method === 'object') {
@@ -50,7 +50,7 @@ function fastifyCall (fastify, options, done) {
     } else {
       _request.query = params
     }
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       if (path.substr(0, 1) !== '/') {
         path = ['/', path].join('')
       }
@@ -77,8 +77,8 @@ function fastifyCall (fastify, options, done) {
           code >= 400 && (resolve = reject) // code gte 400 should reject result
           return _reply.code(code)
         }
-        let done = () => {
-          let callHandler = call[method].handler(_request, _reply)
+        const done = () => {
+          const callHandler = call[method].handler(_request, _reply)
           if (isPromise(callHandler)) {
             callHandler.then((payload) => {
               resetReply()
@@ -92,7 +92,7 @@ function fastifyCall (fastify, options, done) {
           }
         }
         if (call[method].preHandler) {
-          let preHandler = call[method].preHandler(_request, _reply, () => {})
+          const preHandler = call[method].preHandler(_request, _reply, () => {})
           // if (Object.prototype.toString.call(preHandler) === '[object AsyncFunction]') {
           //   await preHandler(_request, _reply, () => {})
           //   done()

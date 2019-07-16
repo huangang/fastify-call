@@ -13,7 +13,7 @@ test('call self', function (t) {
       done()
     },
     handler: (request, reply) => {
-      reply.send({ 'hello': 'get t1' })
+      reply.send({ hello: 'get t1' })
     }
   })
 
@@ -22,16 +22,16 @@ test('call self', function (t) {
       console.log('preHandler post t1')
     },
     handler: async (request, reply) => {
-      return Object.assign({ 'hello': 'post t1' }, request.body)
+      return Object.assign({ hello: 'post t1' }, request.body)
     }
   })
 
   fastify.put('/t1', async (request, reply) => {
-    reply.code(500).send(Object.assign({ 'hello': 'put t1' }, request.body))
+    reply.code(500).send(Object.assign({ hello: 'put t1' }, request.body))
   })
 
   fastify.delete('/t1', async (request, reply) => {
-    return reply.send({ 'hello': 'delete t1' })
+    return reply.send({ hello: 'delete t1' })
   })
 
   fastify.get('/t2', function (request, reply) {
@@ -80,7 +80,7 @@ test('call self', function (t) {
   })
 
   fastify.get('/t9', async (request, reply) => {
-    let res = await fastify.call.get('t8')
+    const res = await fastify.call.get('t8')
     res.world = 't9'
     return res
   })

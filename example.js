@@ -9,7 +9,7 @@ fastify.get('/t1', {
     done()
   },
   handler: (request, reply) => {
-    reply.send({ 'hello': 'get t1' })
+    reply.send({ hello: 'get t1' })
   }
 })
 
@@ -26,16 +26,16 @@ fastify.post('/t1', {
     return 1
   },
   handler: async (request, reply) => {
-    return Object.assign({ 'hello': 'post t1' }, request.body)
+    return Object.assign({ hello: 'post t1' }, request.body)
   }
 })
 
 fastify.put('/t1', async (request, reply) => {
-  reply.code(500).send(Object.assign({ 'hello': 'put t1' }, request.body))
+  reply.code(500).send(Object.assign({ hello: 'put t1' }, request.body))
 })
 
 fastify.delete('/t1', async (request, reply) => {
-  return reply.send({ 'hello': 'delete t1' })
+  return reply.send({ hello: 'delete t1' })
 })
 
 fastify.get('/t2', function (request, reply) {
@@ -84,7 +84,7 @@ fastify.get('/t8', async (request, reply) => {
 })
 
 fastify.get('/t9', async (request, reply) => {
-  let res = await fastify.call.get('t8')
+  const res = await fastify.call.get('t8')
   res.world = 't9'
   return res
 })
