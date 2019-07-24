@@ -75,7 +75,7 @@ function fastifyCall (fastify, options, done) {
         _reply.code = (code) => {
           _reply.code = originCode
           code >= 400 && (resolve = reject) // code gte 400 should reject result
-          return _reply.code(code)
+          return _reply
         }
         const done = () => {
           const callHandler = call[method].handler(_request, _reply)

@@ -154,7 +154,7 @@ test('call self', function (t) {
         json: true
       }, (err, response, body) => {
         t.error(err)
-        t.strictEqual(response.statusCode, 500)
+        t.strictEqual(response.statusCode, 200)
         t.equal(body.error, 'error')
         t.pass('pass t4')
       })
