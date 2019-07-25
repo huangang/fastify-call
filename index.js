@@ -51,6 +51,9 @@ function fastifyCall (fastify, options, done) {
       _request.query = params
     }
     return new Promise((resolve, reject) => {
+      if (!path) {
+        throw new Error(`'path is ${path}`)
+      }
       if (path.substr(0, 1) !== '/') {
         path = ['/', path].join('')
       }
