@@ -2,40 +2,19 @@
 
 const fp = require('fastify-plugin')
 
-function isPromise (func) {
-  return func && typeof func.then === 'function'
+function isJson (text) {
+  return (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@') // eslint-disable-line no-useless-escape
+    .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']') // eslint-disable-line no-useless-escape
+    .replace(/(?:^|:|,)(?:\s*\[)+/g, '')))
 }
 
 function fastifyCall (fastify, options, done) {
-  const routes = new Map()
-  fastify.addHook('onRoute', (routeOptions) => {
-    const { method, schema, url, logLevel, prefix, bodyLimit, handler, preHandler } = routeOptions
-    const _method = Array.isArray(method) ? method : [method]
-
-    _method.forEach(method => {
-      const key = method.toLowerCase()
-      const route = { method, schema, url, logLevel, prefix, bodyLimit, handler, preHandler }
-
-      if (routes.has(url)) {
-        const current = routes.get(url)
-        routes.set(url, Object.assign(current, { [key]: route }))
-      } else {
-        routes.set(url, { [key]: route })
-      }
-    })
-  })
-
-  let _request
-  let _reply
-  fastify.addHook('preHandler', (request, reply, done) => {
-    _reply = reply
-    _request = request
-    done()
-  })
-
   // options = options || {}
 
   const call = (path, params, method = 'get') => {
+    if (!path) {
+      throw new Error(`'path is ${path}`)
+    }
     if (typeof params === 'string') {
       let _method
       if (typeof method === 'object') {
@@ -45,77 +24,25 @@ function fastifyCall (fastify, options, done) {
       params = _method || {}
     }
     method = method.toLowerCase()
+    let query = {}
+    let payload = {}
     if (method === 'post' || method === 'put') {
-      _request.body = params
+      payload = params
     } else {
-      _request.query = params
+      query = params
     }
-    return new Promise((resolve, reject) => {
-      if (!path) {
-        throw new Error(`'path is ${path}`)
+    return fastify.inject({
+      method,
+      url: path,
+      query: query,
+      payload: payload
+    }).then(response => {
+      let payload = response.payload
+      isJson(payload) && (payload = JSON.parse(payload))
+      if (response.statusCode >= 400) {
+        throw payload
       }
-      if (path.substr(0, 1) !== '/') {
-        path = ['/', path].join('')
-      }
-      const call = routes.get(path)
-      if (call && call[method]) {
-        const originSend = _reply.send
-        const originCode = _reply.code
-        let reset = false
-        const resetReply = () => {
-          if (reset) {
-            return
-          }
-          _reply.send = originSend
-          _reply.code = originCode
-          reset = true
-        }
-        _reply.send = (payload) => {
-          // console.log('path %s method %s payload %j', path, method, payload)
-          resetReply()
-          resolve(payload)
-        }
-        _reply.code = (code) => {
-          _reply.code = originCode
-          code >= 400 && (resolve = reject) // code gte 400 should reject result
-          return _reply
-        }
-        const done = () => {
-          const callHandler = call[method].handler(_request, _reply)
-          if (isPromise(callHandler)) {
-            callHandler.then((payload) => {
-              resetReply()
-              if (typeof payload !== 'undefined') {
-                resolve(payload)
-              }
-            }).catch((err) => {
-              resetReply()
-              reject(err)
-            })
-          }
-        }
-        if (call[method].preHandler) {
-          const preHandler = call[method].preHandler(_request, _reply, () => {})
-          // if (Object.prototype.toString.call(preHandler) === '[object AsyncFunction]') {
-          //   await preHandler(_request, _reply, () => {})
-          //   done()
-          // } else {
-          //   preHandler(_request, _reply, done)
-          // }
-          if (isPromise(preHandler)) {
-            preHandler.then(() => {
-              done()
-            })
-          } else {
-            done()
-          }
-        } else {
-          done()
-        }
-      } else {
-        // console.error(method, path + ' call not found')
-        reject(new Error('call ' + method + ' ' + path + ' not found'))
-      }
+      return payload
     })
   }
 

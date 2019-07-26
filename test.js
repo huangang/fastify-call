@@ -285,8 +285,8 @@ test('call self', function (t) {
         json: true
       }, (err, response, body) => {
         t.error(err)
-        t.strictEqual(response.statusCode, 500)
-        t.equal(body.message, 'call get /t1000 not found')
+        t.strictEqual(response.statusCode, 404)
+        t.equal(body.message, 'Not Found')
         t.pass('pass t100')
       })
     })
