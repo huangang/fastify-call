@@ -119,7 +119,8 @@ test('call self', function (t) {
       simple.concat({
         method: 'GET',
         url: 'http://localhost:' + port + '/t2',
-        json: true
+        json: true,
+        headers: { token: 'test' }
       }, (err, response, body) => {
         t.error(err)
         t.strictEqual(response.statusCode, 200)

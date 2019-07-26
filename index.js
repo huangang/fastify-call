@@ -10,6 +10,11 @@ function isJson (text) {
 
 function fastifyCall (fastify, options, done) {
   // options = options || {}
+  let headers
+  fastify.addHook('onRequest', (request, reply, done) => {
+    headers = request.headers
+    done()
+  })
 
   const call = (path, params, method = 'get') => {
     if (!path) {
@@ -35,7 +40,8 @@ function fastifyCall (fastify, options, done) {
       method,
       url: path,
       query: query,
-      payload: payload
+      payload: payload,
+      headers
     }).then(response => {
       let payload = response.payload
       isJson(payload) && (payload = JSON.parse(payload))
