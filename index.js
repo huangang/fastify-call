@@ -1,6 +1,9 @@
 'use strict'
 
 const fp = require('fastify-plugin')
+const DELETE_HEADERS = [
+  'content-length'
+]
 
 function isJson (text) {
   return (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@') // eslint-disable-line no-useless-escape
@@ -13,6 +16,11 @@ function fastifyCall (fastify, options, done) {
   let headers
   fastify.addHook('onRequest', (request, reply, done) => {
     headers = request.headers
+    for (var prop in headers) {
+      if (DELETE_HEADERS.indexOf(prop) > -1) {
+        delete headers[prop]
+      }
+    }
     done()
   })
 
