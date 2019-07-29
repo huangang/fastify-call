@@ -13,30 +13,40 @@ function isJson (text) {
 
 function fastifyCall (fastify, options, done) {
   // options = options || {}
-  let headers
+  let reqHeaders
   fastify.addHook('onRequest', (request, reply, done) => {
-    headers = request.headers
-    for (var prop in headers) {
+    reqHeaders = request.headers
+    for (var prop in reqHeaders) {
       if (DELETE_HEADERS.indexOf(prop) > -1) {
-        delete headers[prop]
+        delete reqHeaders[prop]
       }
     }
     done()
   })
 
-  const call = (path, params, method = 'get') => {
+  const call = (options = { }) => {
+    let path
+    let params
+    let method
+    let headers
+    if (typeof options === 'string') {
+      path = options
+      params = {}
+      method = 'get'
+      headers = {}
+    } else if (typeof options === 'object') {
+      path = options.path
+      params = options.params || {}
+      method = options.method || 'get'
+      headers = options.headers || {}
+    } else {
+      throw new Error('call options error')
+    }
     if (!path) {
       throw new Error(`'path is ${path}`)
     }
-    if (typeof params === 'string') {
-      let _method
-      if (typeof method === 'object') {
-        _method = Object.assign({}, method)
-      }
-      method = params
-      params = _method || {}
-    }
     method = method.toLowerCase()
+    headers = Object.assign(reqHeaders, headers)
     let query = {}
     let payload = {}
     if (method === 'post' || method === 'put') {
@@ -62,8 +72,13 @@ function fastifyCall (fastify, options, done) {
 
   const METHODS = ['get', 'post', 'delete', 'put', 'head', 'options', 'patch']
   METHODS.forEach((method) => {
-    call[method] = (path, params = {}) => {
-      return call(path, params, method)
+    call[method] = (path, params = {}, headers = {}) => {
+      if (typeof path === 'object') {
+        path = path.path
+        params = path.params || {}
+        headers = path.headers || {}
+      }
+      return call({ path, params, headers, method })
     }
   })
 

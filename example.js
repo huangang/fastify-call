@@ -98,7 +98,7 @@ fastify.post('/t11', async (request, reply) => {
 })
 
 fastify.get('/t12', async (request, reply) => {
-  return fastify.call('/t11', 'post', { a: 1, b: 2 })
+  return fastify.call({ path: '/t11', method: 'post', params: { a: 1, b: 2 } })
 })
 
 fastify.get('/t13', async (request, reply) => {
@@ -106,7 +106,7 @@ fastify.get('/t13', async (request, reply) => {
 })
 
 fastify.get('/t14', async (request, reply) => {
-  return fastify.call('/t13', 'post')
+  return fastify.call.post('/t13')
 })
 
 fastify.get('/t15', async (request, reply) => {

@@ -94,7 +94,7 @@ test('call self', function (t) {
   })
 
   fastify.get('/t12', async (request, reply) => {
-    return fastify.call('/t11', 'post', { a: 1, b: 2 })
+    return fastify.call.post({ path: '/t11', params: { a: 1, b: 2 } })
   })
 
   fastify.get('/t13', async (request, reply) => {
@@ -102,7 +102,7 @@ test('call self', function (t) {
   })
 
   fastify.get('/t14', async (request, reply) => {
-    return fastify.call('/t13', 'get')
+    return fastify.call('/t13')
   })
 
   fastify.get('/t100', async (request, reply) => {
