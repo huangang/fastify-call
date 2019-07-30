@@ -1,9 +1,9 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-const DELETE_HEADERS = [
-  'content-length'
-]
+// const DELETE_HEADERS = [
+//   'content-length'
+// ]
 
 function isJson (text) {
   return (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@') // eslint-disable-line no-useless-escape
@@ -11,16 +11,16 @@ function isJson (text) {
     .replace(/(?:^|:|,)(?:\s*\[)+/g, '')))
 }
 
-function fastifyCall (fastify, options, done) {
-  // options = options || {}
+function fastifyCall (fastify, opts, done) {
   let reqHeaders
   fastify.addHook('onRequest', (request, reply, done) => {
     reqHeaders = request.headers
-    for (var prop in reqHeaders) {
-      if (DELETE_HEADERS.indexOf(prop) > -1) {
-        delete reqHeaders[prop]
-      }
-    }
+    // for (var prop in reqHeaders) {
+    //   if (DELETE_HEADERS.indexOf(prop) > -1) {
+    //     delete reqHeaders[prop]
+    //   }
+    // }
+    delete reqHeaders['content-length']
     done()
   })
 
@@ -39,6 +39,10 @@ function fastifyCall (fastify, options, done) {
       params = options.params || {}
       method = options.method || 'get'
       headers = options.headers || {}
+      for (var prop in headers) {
+        headers[prop.toLowerCase()] = headers[prop]
+        delete headers[prop]
+      }
     } else {
       throw new Error('call options error')
     }
@@ -46,7 +50,7 @@ function fastifyCall (fastify, options, done) {
       throw new Error(`'path is ${path}`)
     }
     method = method.toLowerCase()
-    headers = Object.assign(reqHeaders, headers)
+    headers = Object.assign({ 'content-type': 'application/json' }, reqHeaders, headers)
     let query = {}
     let payload = {}
     if (method === 'post' || method === 'put') {

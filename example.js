@@ -39,7 +39,7 @@ fastify.delete('/t1', async (request, reply) => {
 })
 
 fastify.get('/t2', function (request, reply) {
-  return fastify.call.get('t1').then((data) => {
+  return fastify.call.get('t1', {}, { 'Content-Type': 'application/x-www-form-urlencoded' }).then((data) => {
     // console.log('call t2')
     data.world = 't2'
     return reply.send(data)

@@ -76,7 +76,7 @@ test('call self', function (t) {
   })
 
   fastify.get('/t8', async (request, reply) => {
-    return fastify.call.get('t2')
+    return fastify.call.get('t2', null, { 'Content-Type': 'application/x-www-form-urlencoded' })
   })
 
   fastify.get('/t9', async (request, reply) => {
