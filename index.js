@@ -14,12 +14,7 @@ function isJson (text) {
 function fastifyCall (fastify, opts, done) {
   let reqHeaders
   fastify.addHook('onRequest', (request, reply, done) => {
-    reqHeaders = request.headers
-    // for (var prop in reqHeaders) {
-    //   if (DELETE_HEADERS.indexOf(prop) > -1) {
-    //     delete reqHeaders[prop]
-    //   }
-    // }
+    reqHeaders = Object.assign({}, opts.headers || {}, request.headers)
     delete reqHeaders['content-length']
     done()
   })

@@ -5,7 +5,11 @@ const simple = require('simple-get')
 test('call self', function (t) {
   const fastify = require('fastify')()
 
-  fastify.register(require('.'))
+  fastify.register(require('.'), {
+    headers: {
+      'X-APP-TOKEN': 'token'
+    }
+  })
 
   fastify.get('/t1', {
     preHandler: (request, reply, done) => {
@@ -287,7 +291,7 @@ test('call self', function (t) {
       }, (err, response, body) => {
         t.error(err)
         t.strictEqual(response.statusCode, 404)
-        t.equal(body.message, 'Not Found')
+        t.equal(body.message, 'Route GET:/t1000 not found')
         t.pass('pass t100')
       })
     })
