@@ -1,9 +1,6 @@
 'use strict'
 
 const fp = require('fastify-plugin')
-// const DELETE_HEADERS = [
-//   'content-length'
-// ]
 
 function isJson (text) {
   return (/^[\],:{}\s]*$/.test(text.replace(/\\["\\\/bfnrtu]/g, '@') // eslint-disable-line no-useless-escape
@@ -12,13 +9,6 @@ function isJson (text) {
 }
 
 function fastifyCall (fastify, opts, done) {
-  let reqHeaders
-  fastify.addHook('onRequest', (request, reply, done) => {
-    reqHeaders = Object.assign({}, opts.headers || {}, request.headers)
-    delete reqHeaders['content-length']
-    done()
-  })
-
   const call = (options = { }) => {
     let path
     let params
@@ -45,7 +35,6 @@ function fastifyCall (fastify, opts, done) {
       throw new Error(`'path is ${path}`)
     }
     method = method.toLowerCase()
-    headers = Object.assign({ 'content-type': 'application/json' }, reqHeaders, headers)
     let query = {}
     let payload = {}
     if (method === 'post' || method === 'put') {
