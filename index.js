@@ -8,7 +8,7 @@ function isJson (text) {
     .replace(/(?:^|:|,)(?:\s*\[)+/g, '')))
 }
 
-function fastifyCall (fastify, opts, done) {
+function fastifyCall (fastify, opts = {}, done) {
   const call = (options = { }) => {
     let path
     let params
