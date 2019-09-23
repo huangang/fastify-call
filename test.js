@@ -58,7 +58,7 @@ test('call self', function (t) {
       data.world = 't4'
       return reply.send(data)
     }).catch((err) => {
-      // console.error('t4 error', err)
+      console.error('t4 error', err)
       err.error = 'error'
       return reply.send(err)
     })

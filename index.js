@@ -42,6 +42,7 @@ function fastifyCall (fastify, opts, done) {
     } else {
       query = params
     }
+    headers = Object.assign({}, headers, opts.headers)
     return fastify.inject({
       method,
       url: path,
@@ -52,7 +53,7 @@ function fastifyCall (fastify, opts, done) {
       let payload = response.payload
       isJson(payload) && (payload = JSON.parse(payload))
       if (response.statusCode >= 400) {
-        throw payload
+        return Promise.reject(payload)
       }
       return payload
     })
