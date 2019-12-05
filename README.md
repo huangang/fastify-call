@@ -3,7 +3,7 @@
 Fastify plugin to call self method.
 
 [![Build Status](https://travis-ci.org/huangang/fastify-call.svg?branch=master)](https://travis-ci.org/huangang/fastify-call)
-[![NPM version](https://img.shields.io/npm/v/fastify-call.svg?style=flat)](https://www.npmjs.com/package/fastify-call)
+[![NPM version](https://img.shields.io/npm/v/fastify-call.svg?style=flat)](https://www.npmjs.com/package/fastify-call) [![Greenkeeper badge](https://badges.greenkeeper.io/huangang/fastify-call.svg)](https://greenkeeper.io/)
 ## Install
 ```
 npm i fastify-call --save
